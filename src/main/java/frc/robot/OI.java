@@ -40,26 +40,22 @@ public class OI {
     //     return ((Driver.getRightTriggerAxis() - Driver.getLeftTriggerAxis()) * Robot.m_Chooser.getSelected());
     // }
 
+
+
+
+
+
+
     public OI() {
-
         aButton.whileTrue(new ArmCommand());
-
-
     }
 
     public static double getSpeed () {
-
-
-        // if (Math.abs(Driver.getRightTriggerAxis() - Driver.getLeftTriggerAxis()) > 0.15) {
-
-            return (Driver.getRightTriggerAxis() - Driver.getLeftTriggerAxis());
         
-        }
-        
+        return (Driver.getRightTriggerAxis() - Driver.getLeftTriggerAxis());
+    }
 
     public static double getTurn () {
         return (Driver.getRawAxis(0)) * 0.75;
     }
-    
-
 }

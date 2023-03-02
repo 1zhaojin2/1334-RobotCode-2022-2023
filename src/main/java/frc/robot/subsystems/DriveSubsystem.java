@@ -16,6 +16,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.drive.*;
 
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.SPI;
@@ -25,6 +26,9 @@ import edu.wpi.first.wpilibj.SPI;
  * Add your docs here.
  */
 public class DriveSubsystem extends SubsystemBase {
+
+
+  PIDController headingPIDControl = new PIDController(0.1, 0, 0);
 
 
   AHRS ahrs = new AHRS(SPI.Port.kMXP);
@@ -38,13 +42,26 @@ public class DriveSubsystem extends SubsystemBase {
   TalonSRX Left2 = new TalonSRX(RobotMap.Left2);
   TalonSRX Right1 = new TalonSRX(RobotMap.Right1);
   TalonSRX Right2 = new TalonSRX(RobotMap.Right2);
- 
+
+  public DriveSubsystem(){
+    headingPIDControl.enableContinuousInput(-180, 180);
+    headingPIDControl.setTolerance(0.1f);
+  }
+
 
   public void TankDrive (double left, double right) {
 
     double yaw = ahrs.getAngle();
     double pitch = ahrs.getPitch();
     double roll = ahrs.getRoll(); 
+
+    double output = headingPIDControl.calculate(yaw, 0);
+
+    Left1.set(ControlMode.PercentOutput, left - output);
+    Left2.set(ControlMode.PercentOutput, left - output);
+    Right1.set(ControlMode.PercentOutput, -(right + output));
+    Right2.set(ControlMode.PercentOutput, -(right + output));
+
 
 
     double threshold = 10.0; // adjust as needed
@@ -65,15 +82,10 @@ public class DriveSubsystem extends SubsystemBase {
                
     }
 
-    // Drive the left and right sides of the talons
-    Left1.set(ControlMode.PercentOutput, left);
-    Left2.set(ControlMode.PercentOutput, left);
-    Right1.set(ControlMode.PercentOutput,-right);
-    Right2.set(ControlMode.PercentOutput,-right);
-
     SmartDashboard.putNumber("pitch", pitch);
     SmartDashboard.putNumber("roll", roll);
     SmartDashboard.putNumber("yaw", yaw);
+    SmartDashboard.putNumber("PID", output);
 
     System.out.println("pitch: " + pitch + "  roll: " + roll + "  yaw: " + yaw);
     
