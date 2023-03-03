@@ -25,16 +25,15 @@ import edu.wpi.first.wpilibj.SPI;
  */
 public class DriveSubsystem extends SubsystemBase {
 
+  double kp = 0.1, ki = 0, kd = 0;
 
-  PIDController headingPIDControl = new PIDController(0.1, 0, 0);
+  float pidTolerance = 0.1f;
+
+
+  PIDController headingPIDControl = new PIDController(kp, ki, kd);
 
 
   AHRS ahrs = new AHRS(SPI.Port.kMXP);
-
-  // boolean autoBalanceXMode;
-  // boolean autoBalanceYMode;
-  // double xSpeed;
-  // double ySpeed;
   
   TalonSRX Left1 = new TalonSRX(RobotMap.Left1);
   TalonSRX Left2 = new TalonSRX(RobotMap.Left2);
@@ -43,9 +42,9 @@ public class DriveSubsystem extends SubsystemBase {
 
   public DriveSubsystem(){
     headingPIDControl.enableContinuousInput(-180, 180);
-    headingPIDControl.setTolerance(0.1f);
+    headingPIDControl.setTolerance(pidTolerance);
   }
-
+  
 
   public void TankDrive (double left, double right) {
 
@@ -61,38 +60,25 @@ public class DriveSubsystem extends SubsystemBase {
     Right2.set(ControlMode.PercentOutput, -(right + output));
 
 
+    double absAngle = ahrs.getAngle();
 
-    double threshold = 10.0; // adjust as needed
     
-    while (threshold != 0) {
-
-      if (Math.abs(roll) > threshold) {
-      
-        threshold -= 5.0;
-
-        // If the roll angle exceeds the threshold, reverse the direction of the motors
-        double rollRadian = roll * (Math.PI / 180.0);
-        left = Math.sin(rollRadian) * -1;
-        right = Math.sin(rollRadian) * -1;
-
-
-      }
-               
-    }
 
     SmartDashboard.putNumber("pitch", pitch);
     SmartDashboard.putNumber("roll", roll);
     SmartDashboard.putNumber("yaw", yaw);
     SmartDashboard.putNumber("PID", output);
 
-    System.out.println("pitch: " + pitch + "  roll: " + roll + "  yaw: " + yaw);
+    SmartDashboard.putNumber("Angle", absAngle);
+
+    System.out.println("pitch: " + pitch + "  roll: " + roll + "  yaw: " + yaw + " absAngle: " + absAngle + " output: " + output);
     
   }
 
   public void ArcadeDrive (double speed, double turn) {
     TankDrive((speed - turn) * 0.5, (speed + turn) * 0.5);
   }
-
+}
 
   // static final double kOffBalanceAngleThresholdDegrees = 10;
   // static final double kOonBalanceAngleThresholdDegrees = 5;
@@ -140,6 +126,3 @@ public class DriveSubsystem extends SubsystemBase {
 
   //   System.out.println("xSpeed: " + xSpeed + " yaw: " + yawAngleDegrees);
   // }
-
- 
-}
