@@ -40,7 +40,9 @@ public class OI {
 
 
 
-
+    public static boolean getAutoBalance() {
+        return Driver.getXButton();
+    }
 
 
     public OI() {

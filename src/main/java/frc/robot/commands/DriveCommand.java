@@ -33,8 +33,13 @@ public class DriveCommand extends CommandBase {
   // Called repeatedly when this Command is scheduled to run
   public void execute() {
 
-    Robot.DriveSubsystem.ArcadeDrive(OI.getSpeed(), OI.getTurn());
+    if (OI.getAutoBalance()) {
+      Robot.DriveSubsystem.toggleAutoBalance(true);
+    } else {
+      Robot.DriveSubsystem.toggleAutoBalance(false);
+    }
 
+    Robot.DriveSubsystem.ArcadeDrive(OI.getSpeed(), OI.getTurn());
   }
 
   // Make this return true when this Command no longer needs to run execute()

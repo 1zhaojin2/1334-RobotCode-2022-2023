@@ -11,10 +11,10 @@ import frc.robot.RobotMap;
 
 // import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.ctre.phoenix.motorcontrol.ControlMode;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.SPI;
@@ -34,30 +34,51 @@ public class DriveSubsystem extends SubsystemBase {
 
 
   AHRS ahrs = new AHRS(SPI.Port.kMXP);
+
+  static boolean autoBalanceBoolean = false;
+
+
   
-  TalonSRX Left1 = new TalonSRX(RobotMap.Left1);
+/*   TalonSRX Left1 = new TalonSRX(RobotMap.Left1);
   TalonSRX Left2 = new TalonSRX(RobotMap.Left2);
   TalonSRX Right1 = new TalonSRX(RobotMap.Right1);
-  TalonSRX Right2 = new TalonSRX(RobotMap.Right2);
+  TalonSRX Right2 = new TalonSRX(RobotMap.Right2); */
 
+  CANSparkMax Left1 = new CANSparkMax(RobotMap.Left1, MotorType.kBrushless);
+  CANSparkMax Left2 = new CANSparkMax(RobotMap.Left2, MotorType.kBrushless);
+  CANSparkMax Right1 = new CANSparkMax(RobotMap.Right1, MotorType.kBrushless);
+  CANSparkMax Right2 = new CANSparkMax(RobotMap.Right2, MotorType.kBrushless);
+
+
+
+
+
+  
   public DriveSubsystem(){
     headingPIDControl.enableContinuousInput(-180, 180);
     headingPIDControl.setTolerance(pidTolerance);
   }
-  
 
+  
   public void TankDrive (double left, double right) {
 
     double yaw = ahrs.getAngle();
     double pitch = ahrs.getPitch();
     double roll = ahrs.getRoll(); 
 
-    double output = headingPIDControl.calculate(yaw, 0);
+    double output;
 
-    Left1.set(ControlMode.PercentOutput, left - output);
-    Left2.set(ControlMode.PercentOutput, left - output);
-    Right1.set(ControlMode.PercentOutput, -(right + output));
-    Right2.set(ControlMode.PercentOutput, -(right + output));
+
+    if(autoBalanceBoolean) {
+      output = headingPIDControl.calculate(yaw, 0);
+    } else {
+      output = 0;
+    }
+
+    Left1.set(-(left - output));
+    Left2.set(-(left - output));
+    Right1.set(right + output);
+    Right2.set(right + output);
 
 
     double absAngle = ahrs.getAngle();
@@ -77,6 +98,10 @@ public class DriveSubsystem extends SubsystemBase {
 
   public void ArcadeDrive (double speed, double turn) {
     TankDrive((speed - turn) * 0.5, (speed + turn) * 0.5);
+  }
+
+  public void toggleAutoBalance (boolean b) {
+    autoBalanceBoolean = b;
   }
 }
 
@@ -115,10 +140,10 @@ public class DriveSubsystem extends SubsystemBase {
   //   // }
 
   //   try {
-  //     Left1.set(ControlMode.PercentOutput, xSpeed);
-  //     Left2.set(ControlMode.PercentOutput, xSpeed);
-  //     Right1.set(ControlMode.PercentOutput, xSpeed);
-  //     Right2.set(ControlMode.PercentOutput, xSpeed);
+  //     Left1.set(xSpeed);
+  //     Left2.set(xSpeed);
+  //     Right1.set(xSpeed);
+  //     Right2.set(xSpeed);
   //   } catch (RuntimeException ex) {
   //       String err_string = "Drive system error:  " + ex.getMessage();
   //       DriverStation.reportError(err_string, true);
